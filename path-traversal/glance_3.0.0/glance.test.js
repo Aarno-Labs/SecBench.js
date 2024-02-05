@@ -1,5 +1,4 @@
 const path = require("path");
-const { sleep } = require("sleep");
 const pathToFlag = path.resolve(__dirname, "../flag.html");
 function genstr(n) {
   return "/..".repeat(50) + pathToFlag;
