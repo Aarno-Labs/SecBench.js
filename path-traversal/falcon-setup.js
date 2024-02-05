@@ -29,8 +29,6 @@ const handler = {
 
     options = addFalconToOptions(options)
 
-    console.log("Running exec with %s", JSON.stringify(options))
-
     const callArgs = [command, options, callback]
     return Reflect.apply(target, self, callArgs)
   }
