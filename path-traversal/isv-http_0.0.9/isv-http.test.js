@@ -1,3 +1,9 @@
+var execSync = require("child_process").execSync;
+afterAll(() => {
+  try {
+    execSync("fuser -k 9527/tcp", () => {});
+  } catch (e) {}
+});
 const path = require("path");
 const pathToFlag = path.resolve(__dirname, "../flag.html");
 function genstr(n) {
@@ -5,7 +11,6 @@ function genstr(n) {
 }
 test("Path Traversal in isv-http", (done) => {
   expect.assertions(1);
-  const pkg = require("isv-http");
   const fs = require("fs");
   const sleep = require("sleep");
   const { exec } = require("child_process");

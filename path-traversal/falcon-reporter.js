@@ -51,6 +51,9 @@ class FalconReporter {
 
   // Called when all tests have completed running
   onRunComplete(test, results) {
+    if(results.numTotalTests != 1) {
+      throw Error("Expect a single test per test")
+    }
     console.log('\n---------------------FALCON RESULTS----------------------');
     console.log('Falcon successes: [%s/%s]', this.falconSuccesses.length, results.numTotalTests)
     for (const name of this.falconSuccesses) {
@@ -61,7 +64,7 @@ class FalconReporter {
       console.log('\x1b[30m\x1b[41m%s\x1b[0m', ' FAIL ', name);
     }
     console.log('\n----------------------------------------------------------');
-    if(this.falconSuccesses.length < results.numTotalTests) {
+    if(this.falconSuccesses.length != 1) {
       process.exit(1)
     } else {
       process.exit(0)
