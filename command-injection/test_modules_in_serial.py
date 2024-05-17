@@ -3,6 +3,7 @@ import os
 import traceback
 import subprocess
 import time
+import sys
 
 start = time.time()
 count=0
@@ -24,7 +25,7 @@ for folder in lst:
             index = test_file_full_path.find("/",2)
             test_file_name =  test_file_full_path[index+1:]
             print(test_file_name)
-            ping = subprocess.run(['jest', '--forceExit', test_file_name], stdout=None, check=True)
+            ping = subprocess.run(['jest', '--forceExit'] + sys.argv[1:] + [test_file_name], stdout=None, check=True)
             print(ping)
             if ping.returncode==0:
                 print("TEST PASSED")
@@ -33,7 +34,7 @@ for folder in lst:
                 print("TEST FAILED")
                 failed+=1
             count+=1
-    
+
     except:
         print("TEST FAILED")
         failed+=1
@@ -48,5 +49,4 @@ print(time.time() - start, "seconds")
 print("TOTAL PASSED = ", passed,"/",(passed+failed))
 print("TOTAL FAILED = ", failed)
 print("Failed Tests=====================>")
-print(failed_list)   
-
+print(failed_list)
