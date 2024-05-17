@@ -6,12 +6,10 @@ test("Arbitrary code execution in mobile-icon-resizer", () => {
   file_exist = fs.existsSync(path);
   expect(file_exist).toBe(false);
   let options = {
+    config: __dirname + "/config.js",
+    originalIconFilename: __dirname + "/Icon-40.png",
     android: {
       images: [
-        {
-          baseRatio: require("fs").writeFileSync("mobile-icon-resizer", ``),
-          folder: "drawable-mdpi",
-        },
         {
           baseRatio: "4",
           folder: "drawable-xxxhdpi",
@@ -24,7 +22,7 @@ test("Arbitrary code execution in mobile-icon-resizer", () => {
     },
   };
   try {
-    resize(options, function (err) {});
+  resize(options, function (err) {});
   } catch (e) {}
   file_exist = fs.existsSync(path);
   expect(file_exist).toBe(true);

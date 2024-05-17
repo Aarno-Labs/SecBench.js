@@ -1,3 +1,6 @@
+// This is sanitized, which makes it hard to
+// do anything 'real' with. You can do
+// basic prototype pollution, though
 test("Arbitrary code execution in js-yaml", () => {
   expect.assertions(2);
   const payload =

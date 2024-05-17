@@ -11,7 +11,7 @@ test("Arbitrary code execution in kmc", () => {
   );
   try {
     kmc.analyze("./exploit.js");
-  } catch (e) {}
+  } catch (e) {console.log(e)}
   fs.unlinkSync("./exploit.js");
   file_exist = fs.existsSync(path);
   expect(file_exist).toBe(true);

