@@ -1,4 +1,4 @@
-test("Command Injection in @thi.ng/egf", () => {
+test("Command Injection in egf", () => {
   expect.assertions(2);
   const egf = require("@thi.ng/egf");
   const fs = require("fs");

@@ -1,4 +1,4 @@
-test("Remote code execution in pdf-image", () => {
+test("Remote code execution in pdf-image_2", () => {
   expect.assertions(2);
   var PDFImage = require("pdf-image").PDFImage;
   const fs = require("fs");

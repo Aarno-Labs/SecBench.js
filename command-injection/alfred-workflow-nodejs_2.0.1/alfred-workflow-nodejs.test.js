@@ -1,4 +1,4 @@
-test("Command Injection in killing", (done) => {
+test("Command Injection in alfred-workflow-nodejs", (done) => {
   expect.assertions(2);
   const AlfredNode = require("alfred-workflow-nodejs");
   const fs = require("fs");

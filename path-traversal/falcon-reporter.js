@@ -37,6 +37,8 @@ class FalconReporter {
     } else {
       this.falconFails.push(name)
     }
+
+    // XXX: Cleanup event files!
   }
 
   // Called when each test suite has been completed

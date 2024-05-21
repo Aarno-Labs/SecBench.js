@@ -1,8 +1,8 @@
-test("Command Injection in vboxmanage.js", () => {
+test("Command Injection in vboxmanage", () => {
   expect.assertions(2);
   const VBox = require("vboxmanage.js");
   const fs = require("fs");
-  const path = "./vboxmanag-js";
+  const path = "./vboxmanage";
   try {
     if (fs.existsSync(path)) {
       fs.unlinkSync(path);
@@ -13,7 +13,7 @@ test("Command Injection in vboxmanage.js", () => {
   }
   file_exist = fs.existsSync(path);
   expect(file_exist).toBe(false);
-  return VBox.start(";touch vboxmanag-js;")
+  return VBox.start(";touch vboxmanage;")
     .then(function () {})
     .catch(() => {})
     .finally(() => {

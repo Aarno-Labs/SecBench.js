@@ -3,30 +3,40 @@ const {inspect} = require("util")
 const {argsFromJSON} = require("/home/eli/code/nodejs-agent/dist/argument_learning")
 
 
-function countCommands(node) {
-  if (typeof node == "string" || typeof node == "boolean" || node == undefined) {
-    return 0
-  }
-
-  if (Array.isArray(node)) {
-    return node.map(countCommands).reduce((a, b) => a + b)
-  }
-
-  let n = 0
-
-  if(node.type == "Command") {
-    n += 1
-  }
-
-  for (prop in node) {
-    if (prop == "loc") {
-      continue
+function getCommands(node) {
+  const out = []
+  function rec(node) {
+    if (typeof node == "string" || typeof node == "boolean" || node == undefined) {
+      return
     }
 
-    n += countCommands(node[prop])
+    if (Array.isArray(node)) {
+      return node.forEach(rec)
+    }
+
+    if(node.type == "Command") {
+      out.push(node)
+    }
+
+    for (prop in node) {
+      if (prop == "loc") {
+        continue
+      }
+
+      rec(node[prop])
+    }
   }
 
-  return n
+  rec(node)
+  return out
+}
+
+function isTouchFile(command, file) {
+  return command.name.type == "Word" &&
+  command.name.text == "touch" &&
+  command.suffix[0].type == "Word" &&
+  command.suffix[0].text.kind == "OneOfValue" &&
+  command.suffix[0].text.possibilities.includes(file)
 }
 
 class FalconReporter {
@@ -45,32 +55,36 @@ class FalconReporter {
                    .filter(line => line.length > 0)
                    .map(line => JSON.parse(line))
     const execs = events.filter(e => e.outcome == "train")
-                        .filter(e => e.call == "child_process.exec")
+                        .filter(e => e.call.startsWith("child_process.exec"))
     execs.forEach(e => e.tracked_args = argsFromJSON(e.tracked_args))
 
-    if(execs.length != 1) {
-      console.log("WRONG NUMBER OF EXECS: %s", inspect(execs))
-      throw Error("Wrong number of execs?")
+    const testFile = name.replace("Command Injection in ", "").
+                          replace("Remote code execution in ", "")
+
+    for(const execEvent of execs) {
+      if(!execEvent.kind == "IndependentArgs") {
+        throw Error("Non-independent args in exec: %s", inspect(execEvent.tracked_args))
+      }
+
+
+      const learnedScript = execEvent.tracked_args.args.get("command")
+      const commands = getCommands(learnedScript)
+      console.log("commands: %s", inspect(commands, false, null, true))
+
+      for (const command of commands) {
+        if (isTouchFile(command, testFile)) {
+          this.falconSuccesses.push(name)
+          return
+        }
+      }
     }
 
-    const execEvent = execs[0]
+    console.log(inspect(events.filter(e => e.outcome == "train" && e.call.startsWith("child_process"))))
+    console.log("Testfile is %s", testFile)
 
-    if(!execEvent.kind == "IndependentArgs") {
-      throw Error("Non-independent args in exec: %s", inspect(execEvent.tracked_args))
-    }
+    this.falconFails.push(name)
 
-    const learnedCommand = execEvent.tracked_args.args.get("command")
-    const nSubcommands = countCommands(learnedCommand)
-
-    //console.log(inspect(learnedCommand, false, null, true))
-    console.log("Got %s commands", nSubcommands)
-    if(nSubcommands > 1) {
-      this.falconSuccesses.push(name)
-    } else {
-      this.falconFails.push(name)
-    }
-
-    console.log("Got %s events", events.length)
+    // XXX: Cleanup event files!
   }
 
   // Called when each test suite has been completed
